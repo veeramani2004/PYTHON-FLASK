@@ -1,12 +1,12 @@
 from flask import Flask
 from config import Config
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
+from extensions import db
 
 app = Flask(__name__)
 app.config.from_object(Config)  # URL
 
-db = SQLAlchemy()
+
 db.init_app(app)  # Call
 
 
@@ -16,3 +16,14 @@ with app.app_context():
         print("Connection successful:", result)
     except Exception as e:
         print("Error connecting to the database:", e)
+
+
+@app.get("/")
+def hello_world():
+    print("Super")
+    return "<h1>Hello, World! 🎊🍊 🌽</h1>"
+
+
+from routes.movies_bp import movies_bp
+
+app.register_blueprint(movies_bp, url_prefix="/api/movies")
