@@ -11,3 +11,4 @@ class Config:
     # Connection String
     SQLALCHEMY_DATABASE_URI = environ.get("LOCAL_DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = True
