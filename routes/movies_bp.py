@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from models.movie import Movie
+from extensions import db
 
 
 movies = [
@@ -95,51 +96,66 @@ movies = [
 
 HTTP_NOT_FOUND = 404
 HTTP_CREATED = 201
+HTTP_ERROR = 500
 
 
 movies_bp = Blueprint("movies_bp", __name__)
 
 
-@movies_bp.route("/")
+@movies_bp.get("/")
 def get_movies():
     movies = [movie.to_dict() for movie in Movie.query.all()]
     return movies
 
 
-@movies_bp.route("/<id>")
+@movies_bp.get("/<id>")
 def get_movie_by_id(id):
-    for movie in movies:
-        if movie["id"] == (id):
-            return movie
+    print(id, type(id))
 
-    return {"message": "movie not found"}, 404
+    data = Movie.query.get(id)
+
+    if not data:
+        return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+    movie = data.to_dict()
+    return movie
 
 
 @movies_bp.delete("/<id>")
 def delete_movie_by_id(id):
-    for movie in movies:
-        if movie["id"] == (id):
-            movies.remove(movie)
-            return movie
+    data = Movie.query.get(id)
 
-    return {"message": "movie not found"}, 404
+    if not data:
+        return {"message": "Movie not found"}, HTTP_NOT_FOUND
 
+    movie = data.to_dict()
+    try:
+        # Row lock
+        db.session.delete(data)
+        # raise Exception("Oh no")
+        db.session.commit()
+        # Row release
 
-@movies_bp.put("/<id>")
-def update_movie(id):
-    update_movie = request.get_json()
-    movies.append(*movies[id], update_movie)
-    return update_movie
+        return movie
+    except Exception as err:
+        db.session.rollback()
+        return {"message": str(err)}, HTTP_ERROR
 
 
 @movies_bp.post("/")
 def create_movie():
     # List (Dict) -> JSON
-    new_movie = request.get_json()  # JSON -> Dict, List(Dict)
-    ids = [int(movie["id"]) for movie in movies]
-    new_movie["id"] = str(max(ids) + 1)
-    movies.append(new_movie)
-    return new_movie, HTTP_CREATED
+    data = request.get_json()  # JSON -> Dict, List(Dict)
+    # Movie(name=new_movie['name'], rating=new_movie['rating'])
+
+    new_movie = Movie(**data)  # id
+    try:
+        db.session.add(new_movie)
+        db.session.commit()
+        return new_movie.to_dict(), HTTP_CREATED
+    except Exception as err:
+        db.session.rollback()
+        return {"message": str(err)}, HTTP_ERROR
 
 
 # @movies_bp.put("/<id>")
@@ -152,3 +168,24 @@ def create_movie():
 #             return movie
 
 #     return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+
+@movies_bp.put("/<id>")
+def update_movie(id):
+    body = request.get_json()  # body
+
+    print(id)
+
+    try:
+        updated = Movie.query.filter_by(id=id).update(body)
+
+        if not updated:
+            return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+        db.session.commit()
+        data = Movie.query.get(id)
+        return data.to_dict()
+
+    except Exception as err:
+        db.session.rollback()
+        return {"message": str(err)}, HTTP_ERROR
