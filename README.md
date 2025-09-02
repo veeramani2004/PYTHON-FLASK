@@ -15,3 +15,15 @@ pip install flask
 ### what is api , jinga
 
 # postgresql://postgres:<password>@localhost:5432/movies_bcs
+
+# Relationship (normalization)
+
+- ERD (Entity–Relationship Diagram)
+- forign key costrint(constrint mean which key)
+- cascat delete
+- features -> data -> column -> erd
+- lucidchart
+
+# costrint
+
+- more contraints --> flask documentation

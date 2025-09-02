@@ -2,6 +2,8 @@ from flask import Flask
 from config import Config
 from sqlalchemy.sql import text
 from extensions import db
+from routes.movies_bp import movies_bp
+from routes.users_bp import users_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)  # URL
@@ -24,6 +26,5 @@ def hello_world():
     return "<h1>Hello, World! 🎊🍊 🌽</h1>"
 
 
-from routes.movies_bp import movies_bp
-
 app.register_blueprint(movies_bp, url_prefix="/api/movies")
+app.register_blueprint(users_bp, url_prefix="/api/users")
