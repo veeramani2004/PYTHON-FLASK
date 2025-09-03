@@ -12,6 +12,7 @@ HTTP_ERROR = 500
 movies_bp = Blueprint("movies_bp", __name__)
 
 
+@movies_bp.get("")
 @movies_bp.get("/")
 @jwt_required()
 def get_movies():
