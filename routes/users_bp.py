@@ -2,6 +2,8 @@ from flask import Blueprint, request
 from models.user import User
 from extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token
+
 
 users_bp = Blueprint("users_bp", __name__)
 
@@ -53,5 +55,7 @@ def login_user():
     if not check_password_hash(db_user.get("password"), password):
         return {"error": "username or password is incorrect"}, 401
 
+    token = create_access_token(identity=username)
+
     print("login ✨✨✨✨")
-    return {"message": "Login Up Successful"}
+    return {"message": "Login Up Successful", "token": token}

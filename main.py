@@ -1,15 +1,29 @@
 from flask import Flask
 from config import Config
 from sqlalchemy.sql import text
-from extensions import db
+from flask_cors import CORS
+from extensions import db, jwt
 from routes.movies_bp import movies_bp
 from routes.users_bp import users_bp
+
 
 app = Flask(__name__)
 app.config.from_object(Config)  # URL
 
 
 db.init_app(app)  # Call
+jwt.init_app(app)
+CORS(app)
+
+
+@jwt.unauthorized_loader
+def _unauth(e):
+    return {"error": "missing/invalid token"}, 401
+
+
+@jwt.expired_token_loader
+def _expired(h, p):
+    return ({"error": "token expired"}), 401
 
 
 with app.app_context():
