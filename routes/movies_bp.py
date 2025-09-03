@@ -54,6 +54,7 @@ def delete_movie_by_id(id):
         return {"message": str(err)}, HTTP_ERROR
 
 
+@movies_bp.post("")
 @movies_bp.post("/")
 def create_movie():
     # List (Dict) -> JSON
