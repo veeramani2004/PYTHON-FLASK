@@ -5,7 +5,7 @@ from flask_cors import CORS
 from extensions import db, jwt
 from routes.movies_bp import movies_bp
 from routes.users_bp import users_bp
-
+from os import environ
 
 app = Flask(__name__)
 app.config.from_object(Config)  # URL
@@ -42,3 +42,8 @@ def hello_world():
 
 app.register_blueprint(movies_bp, url_prefix="/api/movies")
 app.register_blueprint(users_bp, url_prefix="/api/users")
+
+
+if __name__ == "__main__":
+    port = environ.get("PORT", 5000)
+    app.run(host="0.0.0.0", port=port, debug=True)
